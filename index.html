@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<!-- Default language set to English -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title set dynamically -->
+    <title data-translate-key="pageTitle">PDF Page Management Tool</title>
+
+    <!-- Google Fonts (Roboto & Noto Sans for wider language support) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Sans+Thai:wght@400;500;700&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* --- CSS Variables --- */
+        :root {
+            --primary-color: #007bff; --secondary-color: #6c757d; --success-color: #28a745;
+            --danger-color: #dc3545; --warning-color: #ffc107; --info-color: #17a2b8;
+            --light-color: #f8f9fa; --dark-color: #343a40; --white-color: #ffffff;
+            --border-color: #dee2e6; --base-font-size: 16px; --border-radius: 0.3rem;
+            --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); --box-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        /* --- Base Styles --- */
+        body {
+            font-family: 'Roboto', 'Noto Sans', 'Noto Sans TC', 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans KR', 'Noto Sans Thai', sans-serif;
+            line-height: 1.6; font-size: var(--base-font-size);
+            margin: 0; background-color: #eef2f7; color: var(--dark-color);
+        }
+
+        /* --- Header & Language Selector --- */
+        .app-header { background-color: var(--dark-color); color: var(--white-color); padding: 10px 0; margin-bottom: 30px; box-shadow: var(--box-shadow); }
+        .app-header .container { display: flex; align-items: center; justify-content: space-between; max-width: 1100px; margin: 0 auto; padding: 0 15px; flex-wrap: wrap; }
+        .logo { font-size: 1.4rem; font-weight: 700; margin-right: 15px; display: inline-flex; align-items: center; gap: 0.5rem;}
+        #languageSwitcher select { padding: 0.3rem 0.6rem; font-size: 0.9rem; border-radius: var(--border-radius); border: 1px solid var(--secondary-color); background-color: var(--light-color); color: var(--dark-color); cursor: pointer; }
+
+        /* --- Main Content Styles --- */
+        .main-container { max-width: 1100px; margin: 30px auto; padding: 0 15px; }
+        .tool-card { background-color: var(--white-color); padding: 30px 40px; border-radius: var(--border-radius); box-shadow: var(--box-shadow-lg); margin-bottom: 30px; }
+        h1 { color: var(--dark-color); margin-bottom: 1.5rem; font-weight: 500; text-align: center; font-size: 2rem; }
+        /* Simplified h2 - remove step indicators via translation */
+        h2 { font-size: 1.5rem; margin-top: 2.5rem; /* Increased margin */ margin-bottom: 1.5rem; font-weight: 500; color: var(--dark-color); text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; }
+        .privacy-note { font-size: 0.9em; color: var(--secondary-color); margin-top: 1rem; text-align: center; padding: 10px; background-color: var(--light-color); border: 1px solid var(--border-color); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-group { margin-bottom: 1.5rem; }
+        input[type="file"], input[type="text"], button { display: block; width: 100%; padding: 0.75rem 1rem; font-size: 1rem; line-height: 1.5; color: var(--dark-color); background-color: var(--white-color); background-clip: padding-box; border: 1px solid var(--border-color); border-radius: var(--border-radius); transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; box-sizing: border-box; }
+        input[type="file"] { border: 1px dashed var(--border-color); background-color: var(--light-color); cursor: pointer; padding: 1rem; } input[type="file"]:hover { background-color: #e9ecef; }
+        input:focus { border-color: var(--primary-color); outline: 0; box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); }
+        button { color: var(--white-color); background-color: var(--primary-color); border-color: var(--primary-color); cursor: pointer; font-weight: 500; text-align: center; vertical-align: middle; user-select: none; transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; } button:hover:not(:disabled) { background-color: #0056b3; border-color: #0056b3; } button:disabled { background-color: var(--secondary-color); border-color: var(--secondary-color); opacity: 0.65; cursor: not-allowed; }
+        #applyStringSelection { background-color: var(--info-color); border-color: var(--info-color); width: auto; white-space: nowrap; flex-shrink: 0; } #applyStringSelection:hover:not(:disabled) { background-color: #117a8b; border-color: #117a8b; }
+        #deleteButton { background-color: var(--danger-color); border-color: var(--danger-color); } #deleteButton:hover:not(:disabled) { background-color: #c82333; border-color: #bd2130; }
+        .button-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.5rem; } .button-group button { width: auto; flex-grow: 1; }
+        #selectAllButton, #deselectAllButton { background-color: var(--secondary-color); border-color: var(--secondary-color); } #selectAllButton:hover:not(:disabled), #deselectAllButton:hover:not(:disabled) { background-color: #5a6268; border-color: #545b62; }
+        #status { margin: 1.5rem 0; padding: 1rem 1.5rem; border-radius: var(--border-radius); font-weight: 500; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.75rem; } #status i { font-size: 1.2em; flex-shrink: 0; }
+        /* Add animation for spinner icon within status */
+        #status i.fa-spinner { animation: spinner-border .75s linear infinite; }
+        @keyframes spinner-border { to { transform: rotate(360deg); } }
+        .info { background-color: #e2f3fb; border: 1px solid #b8e2f5; color: #0c5464; } .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; } .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; } .hidden { display: none; }
+        /* Remove #loadingIndicator styles if element is removed */
+        /* #loadingIndicator { ... } */
+        /* .spinner { ... } */
+        #pagePreviewContainer { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; margin-top: 2rem; padding: 1.5rem; background-color: var(--light-color); border: 1px solid var(--border-color); border-radius: var(--border-radius); min-height: 150px; user-select: none; }
+        .page-item { border: 2px solid var(--border-color); border-radius: var(--border-radius); padding: 12px; text-align: center; background-color: var(--white-color); transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; position: relative; box-shadow: var(--box-shadow); } .page-item:hover { border-color: var(--primary-color); transform: translateY(-3px); box-shadow: var(--box-shadow-lg); } .page-item canvas { max-width: 100%; height: auto; border: 1px solid #f0f0f0; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; border-radius: calc(var(--border-radius) - 2px); } .page-number { font-size: 0.9em; color: var(--secondary-color); font-weight: 500; } .page-item.selected { border-color: var(--danger-color); background-color: #fff5f5; box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.3); } .page-item.selected .page-number { color: var(--danger-color); font-weight: 700; }
+        #selectionHelp { font-size: 0.9em; color: var(--secondary-color); margin-top: -10px; margin-bottom: 1rem; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        #selectionSummary { margin: 1.5rem 0; padding: 0.75rem 1rem; font-weight: 500; text-align: center; border-radius: var(--border-radius); background-color: var(--light-color); border: 1px solid var(--border-color); } #selectionSummary.has-selection { color: var(--danger-color); background-color: #f8d7da; border-color: #f5c6cb; }
+        #downloadLinkContainer { margin-top: 2rem; text-align: center; } #downloadLink { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.8rem 2rem; background-color: var(--success-color); color: white; text-decoration: none; border-radius: var(--border-radius); font-weight: 500; transition: background-color 0.3s ease; border: none; font-size: 1.1rem; } #downloadLink:hover { background-color: #218838; }
+        .app-footer { text-align: center; margin-top: 40px; padding: 20px; font-size: 0.9em; color: var(--secondary-color); }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 768px) {
+            .app-header .container { flex-direction: column; gap: 10px; align-items: stretch; }
+            #languageSwitcher select { width: 100%; text-align: center;}
+            .tool-card { padding: 20px; } h1 { font-size: 1.8rem; } h2 { font-size: 1.3rem; }
+            #pagePreviewContainer { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; padding: 1rem;}
+            .page-item { padding: 8px; } .button-group { flex-direction: column; }
+            .form-group .button-group button { width: 100%; }
+        }
+         @media (max-width: 480px) {
+             .logo { font-size: 1.2rem; text-align: center; justify-content: center; }
+             .app-header .container { padding: 0 10px; }
+             #pagePreviewContainer { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;}
+             input[type="file"], input[type="text"], button { font-size: 0.9rem; padding: 0.6rem 0.8rem;}
+             #downloadLink { font-size: 1rem; padding: 0.7rem 1.5rem;}
+             .form-group div > input[type="text"] { flex-grow: 1; min-width: 100px; }
+             .form-group div > button#applyStringSelection { padding: 0.6rem; }
+             h2 { font-size: 1.2rem; }
+             .privacy-note, #selectionHelp { flex-direction: column; text-align: center; gap: 0.3rem;}
+         }
+    </style>
+
+    <!-- Libraries -->
+    <script src="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';</script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://unpkg.com/pako@2.0.4/dist/pako.min.js"></script>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="container">
+            <div class="logo" data-translate-key="headerTitle"><i class="fas fa-file-pdf"></i> PDF Page Management Tool</div>
+            <div id="languageSwitcher">
+                <select id="langSelect">
+                    <option value="en">English</option>
+                    <option value="zh-TW">繁體中文</option>
+                    <option value="zh-CN">简体中文</option>
+                    <option value="ja">日本語</option>
+                    <option value="ko">한국어</option>
+                    <option value="zh-HK">廣東話 (香港)</option>
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="th">ภาษาไทย</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="tool-card">
+            <h1 data-translate-key="mainHeading">PDF Page Deletion</h1>
+            <p class="privacy-note" data-translate-key="privacyNote"><i class="fas fa-lock"></i> Your files are processed locally...</p>
+
+            <div class="form-group">
+                 <!-- Simplified Heading -->
+                 <h2 data-translate-key="sectionUpload">Upload File</h2>
+                <label for="pdfFile" data-translate-key="uploadLabel">Select or drop your PDF file:</label>
+                <input type="file" id="pdfFile" accept=".pdf">
+            </div>
+
+            <div id="status" class="hidden"></div> <!-- Status messages appear here -->
+
+            <!-- Loading Indicator Block Removed -->
+            <!-- <div id="loadingIndicator" class="hidden"> ... </div> -->
+
+            <div id="controls" class="hidden">
+                 <!-- Simplified Heading -->
+                 <h2 data-translate-key="sectionSelect">Select Pages to Delete</h2>
+
+                 <div class="form-group">
+                    <label for="pagesToDeleteString" data-translate-key="stringInputLabel">Quick select:</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input type="text" id="pagesToDeleteString" data-translate-key="stringInputPlaceholder" placeholder="Example: 1, 3, 5-7, 10" style="flex-grow: 1; min-width: 150px;">
+                        <button id="applyStringSelection"><i class="fas fa-check"></i> <span data-translate-key="applyButton">Apply</span></button>
+                    </div>
+                 </div>
+
+                 <div class="button-group">
+                     <button id="selectAllButton"><i class="fas fa-check-double"></i> <span data-translate-key="selectAllButton">Select All</span></button>
+                     <button id="deselectAllButton"><i class="fas fa-square"></i> <span data-translate-key="deselectAllButton">Deselect All</span></button>
+                 </div>
+
+                <p id="selectionHelp" data-translate-key="selectionHelp"><i class="fas fa-info-circle"></i> Click pages...</p>
+                <div id="selectionSummary"></div>
+
+                <div id="pagePreviewContainer"></div>
+
+                <div class="form-group" style="margin-top: 2rem;">
+                     <!-- Simplified Heading -->
+                     <h2 data-translate-key="sectionConfirm">Confirm Deletion</h2>
+                    <button id="deleteButton" disabled><i class="fas fa-trash-alt"></i> <span data-translate-key="deleteButton">Delete</span></button>
+                </div>
+            </div>
+
+            <div id="downloadLinkContainer" class="hidden" style="margin-top: 2rem;">
+                 <a id="downloadLink" href="#" download="modified_pdf.pdf"><i class="fas fa-download"></i> <span data-translate-key="downloadButton">Download</span></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simplified Footer -->
+    <footer class="app-footer" data-translate-key="footerText">© {year} PDF Page Management Tool. Runs locally in your browser.</footer>
+
+    <script>
+        // --- DOM Elements ---
+        const pdfFile = document.getElementById('pdfFile');
+        const statusDiv = document.getElementById('status');
+        // const loadingIndicator = document.getElementById('loadingIndicator'); // Removed
+        const controlsDiv = document.getElementById('controls');
+        const pagesToDeleteStringInput = document.getElementById('pagesToDeleteString');
+        const applyStringSelectionButton = document.getElementById('applyStringSelection');
+        const selectAllButton = document.getElementById('selectAllButton');
+        const deselectAllButton = document.getElementById('deselectAllButton');
+        const selectionSummary = document.getElementById('selectionSummary');
+        const pagePreviewContainer = document.getElementById('pagePreviewContainer');
+        const deleteButton = document.getElementById('deleteButton');
+        const downloadLinkContainer = document.getElementById('downloadLinkContainer');
+        const downloadLink = document.getElementById('downloadLink');
+        const langSelect = document.getElementById('langSelect');
+
+        // --- Libraries ---
+        const { PDFDocument } = PDFLib;
+        const { pdfjsLib } = window;
+
+        // --- State ---
+        let originalPdfBytes = null;
+        let originalFileName = '';
+        let currentPdfDocumentProxy = null;
+        let totalPages = 0;
+        let selectedIndices = new Set();
+        let lastClickedIndex = -1;
+        let currentLang = 'en'; // Default
+
+        // --- Translations (Simplified Headings, Generic Footer) ---
+        const translations = {
+             'en': {
+                pageTitle: "PDF Page Management Tool",
+                headerTitle: `<i class="fas fa-file-pdf"></i> PDF Page Management Tool`,
+                mainHeading: "PDF Page Deletion",
+                privacyNote: `<i class="fas fa-lock"></i> Your files are processed locally in your browser. No uploads required.`,
+                sectionUpload: "Upload File", // Simplified heading key
+                uploadLabel: "Select or drop your PDF file:",
+                // loadingMessage: "Loading and rendering PDF pages...", // Removed as indicator block is gone
+                sectionSelect: "Select Pages to Delete", // Simplified heading key
+                stringInputLabel: "Quick select via page numbers (Optional):",
+                stringInputPlaceholder: "Example: 1, 3, 5-{totalPages} ({totalPages} total)",
+                applyButton: "Apply",
+                selectAllButton: "Select All",
+                deselectAllButton: "Deselect All",
+                selectionHelp: `<i class="fas fa-info-circle"></i> Click page previews to select/deselect. Hold <strong>Shift</strong> + Click to select a range.`,
+                selectionSummaryDefault: "No pages currently selected.",
+                selectionSummarySelected: "{count} pages selected for deletion.",
+                sectionConfirm: "Confirm Deletion", // Simplified heading key
+                deleteButton: "Delete Selected Pages",
+                downloadButton: "Download Modified PDF",
+                footerText: `© {year} PDF Page Management Tool. Runs locally in your browser.`, // Generic footer
+                pageLabel: "Page {pageNum}",
+                pageRenderError: "Page {pageNum} (Render Failed)",
+                statusFileSelectError: "Please select a valid PDF file.",
+                statusFileReadError: "Error reading the file.",
+                statusLoading: "Loading file...", // Status message still used
+                statusRendering: "Total {totalPages} pages. Rendering previews...", // Status message still used
+                statusRenderComplete: "Ready. Please select pages to delete.", // Adjusted message
+                statusProcessingError: "Error processing PDF: {message}.",
+                statusPasswordError: "Cannot process password-protected PDF.",
+                statusInvalidPDFError: "Invalid or corrupted PDF file.",
+                statusGenericError: "An error occurred: {message}",
+                statusAppliedStringSelection: "{count} pages selected based on input string.",
+                statusSelectedAll: "All {totalPages} pages selected.",
+                statusDeselectedAll: "All page selections cleared.",
+                statusNoPageSelected: "No pages selected for deletion.",
+                statusCannotDeleteAll: "Cannot delete all pages! Please keep at least one.",
+                statusDeleting: "Processing page deletion...",
+                statusDeleteSuccess: "Successfully deleted {count} pages!",
+                statusDeleteError: "Error deleting pages: {message}",
+                parseErrorRangeFormat: `Invalid page range format: "{part}"`,
+                parseErrorRangeInvalid: `Invalid page range: "{part}". Ensure numbers are between 1 and {maxPage} and start <= end.`,
+                parseErrorNumberInvalid: `Invalid page number: "{part}". Ensure number is between 1 and {maxPage}.`
+            },
+             'zh-TW': {
+                pageTitle: "PDF 頁面管理工具",
+                headerTitle: `<i class="fas fa-file-pdf"></i> PDF 頁面管理工具`,
+                mainHeading: "PDF 頁面刪除",
+                privacyNote: `<i class="fas fa-lock"></i> 您的檔案完全在瀏覽器本地處理，無需上傳。`,
+                sectionUpload: "上傳檔案", // Simplified
+                uploadLabel: "選擇或拖放您的 PDF 檔案：",
+                sectionSelect: "選擇要刪除的頁面", // Simplified
+                stringInputLabel: "通過頁碼快速選擇 (選填)：",
+                stringInputPlaceholder: "例如：1, 3, 5-{totalPages} (共 {totalPages} 頁)",
+                applyButton: "套用",
+                selectAllButton: "全選",
+                deselectAllButton: "取消全選",
+                selectionHelp: `<i class="fas fa-info-circle"></i> 點擊預覽圖選取/取消，按住 <strong>Shift</strong> + 點擊可選範圍。`,
+                selectionSummaryDefault: "目前未選取任何頁面。",
+                selectionSummarySelected: "已選取 {count} 個頁面準備刪除。",
+                sectionConfirm: "確認刪除", // Simplified
+                deleteButton: "刪除選取的頁面",
+                downloadButton: "下載修改後的 PDF",
+                footerText: `© {year} PDF 頁面管理工具. 在您的瀏覽器本地運行。`, // Generic footer
+                pageLabel: "第 {pageNum} 頁",
+                pageRenderError: "第 {pageNum} 頁 (渲染失敗)",
+                statusFileSelectError: "請選擇一個有效的 PDF 檔案。",
+                statusFileReadError: "讀取檔案時發生錯誤。",
+                statusLoading: "正在載入檔案...", // Changed
+                statusRendering: "共 {totalPages} 頁。正在渲染預覽圖...",
+                statusRenderComplete: "準備就緒。請選擇要刪除的頁面。", // Changed
+                statusProcessingError: "處理 PDF 時發生錯誤：{message}。",
+                statusPasswordError: "無法處理受密碼保護的 PDF 檔案。",
+                statusInvalidPDFError: "無效或損壞的 PDF 檔案。",
+                statusGenericError: "發生錯誤：{message}",
+                statusAppliedStringSelection: "已根據字串套用 {count} 個頁面選擇。",
+                statusSelectedAll: "已選取全部 {totalPages} 個頁面。",
+                statusDeselectedAll: "已取消所有頁面選擇。",
+                statusNoPageSelected: "尚未選取任何要刪除的頁面。",
+                statusCannotDeleteAll: "無法刪除所有頁面！請至少保留一頁。",
+                statusDeleting: "正在處理頁面刪除...",
+                statusDeleteSuccess: "成功刪除 {count} 頁！",
+                statusDeleteError: "刪除頁面時發生錯誤：{message}",
+                parseErrorRangeFormat: `無效的頁碼範圍格式: "{part}"`,
+                parseErrorRangeInvalid: `無效的頁碼範圍: "{part}". 請確保頁碼在 1 到 {maxPage} 之間且起始不大於結束。`,
+                parseErrorNumberInvalid: `無效的頁碼: "{part}". 請確保頁碼在 1 到 {maxPage} 之間。`
+            },
+             // --- Add OTHER LANGUAGES HERE ---
+             // Remember to simplify heading keys (sectionUpload, sectionSelect, sectionConfirm)
+             // and the footerText key for all languages you add.
+             // Example for Japanese:
+             'ja': {
+                 pageTitle: "PDF ページ管理ツール",
+                 headerTitle: `<i class="fas fa-file-pdf"></i> PDF ページ管理ツール`,
+                 mainHeading: "PDF ページ削除",
+                 privacyNote: `<i class="fas fa-lock"></i> ファイルはブラウザ内でローカルに処理されます。アップロードは不要です。`,
+                 sectionUpload: "ファイルをアップロード",
+                 uploadLabel: "PDFファイルを選択またはドラッグ＆ドロップしてください：",
+                 sectionSelect: "削除するページを選択",
+                 stringInputLabel: "ページ番号でクイック選択 (オプション)：",
+                 stringInputPlaceholder: "例：1, 3, 5-{totalPages} (合計 {totalPages} ページ)",
+                 applyButton: "適用",
+                 selectAllButton: "すべて選択",
+                 deselectAllButton: "選択解除",
+                 selectionHelp: `<i class="fas fa-info-circle"></i> プレビューをクリックして選択/解除。<strong>Shift</strong> + クリックで範囲選択。`,
+                 selectionSummaryDefault: "現在、ページは選択されていません。",
+                 selectionSummarySelected: "{count} ページが削除対象として選択されています。",
+                 sectionConfirm: "削除を確認",
+                 deleteButton: "選択したページを削除",
+                 downloadButton: "変更後のPDFをダウンロード",
+                 footerText: `© {year} PDF ページ管理ツール。ローカルブラウザで実行されます。`,
+                 pageLabel: "ページ {pageNum}",
+                 // ... [Translate ALL status/error messages] ...
+             },
+             // ... Add ko, zh-CN, zh-HK, vi, th etc. similarly ...
+        };
+
+        // --- Translation Function ---
+        function getText(key, replacements = {}) {
+            let text = translations[currentLang]?.[key] || translations['en']?.[key] || key;
+            for (const placeholder in replacements) {
+                const regex = new RegExp(`\\{${placeholder}\\}`, 'g');
+                text = text.replace(regex, replacements[placeholder]);
+            }
+            return text;
+        }
+
+        // --- Update UI Language ---
+        function updateLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            const currentYear = new Date().getFullYear();
+
+            document.querySelectorAll('[data-translate-key]').forEach(el => {
+                const key = el.dataset.translateKey;
+                let replacements = {};
+                if (key === 'footerText') replacements = { year: currentYear };
+                else if (key === 'stringInputPlaceholder') replacements = { totalPages: totalPages > 0 ? totalPages : 'N' };
+
+                const translation = getText(key, replacements);
+
+                if (key === 'pageTitle') {
+                    document.title = translation;
+                } else if (key === 'stringInputPlaceholder' && el.tagName === 'INPUT') {
+                     el.placeholder = translation;
+                }
+                // Use innerHTML only for keys known to contain simple formatting (like <strong>) or icons
+                else if (['privacyNote', 'selectionHelp', 'headerTitle'].includes(key) ) {
+                   el.innerHTML = translation;
+                }
+                 // For headings and footer (no icons/HTML expected now) and other simple text
+                 else {
+                     const span = el.querySelector('span'); // Check for span inside button
+                     if (span && el.tagName === 'BUTTON') {
+                         span.textContent = translation;
+                     } else if (!el.matches('i')) { // Don't overwrite icons
+                          el.textContent = translation; // Default to textContent
+                     }
+                 }
+            });
+
+            // Re-update dynamic elements
+             if (currentPdfDocumentProxy) {
+                 updateSelectionSummary();
+                 document.querySelectorAll('.page-item .page-number').forEach(span => {
+                     const pageItem = span.closest('.page-item');
+                     if (pageItem && pageItem.dataset.pageIndex) {
+                         const pageNum = parseInt(pageItem.dataset.pageIndex, 10) + 1;
+                         if (span.dataset.isError === 'true') span.textContent = getText('pageRenderError', { pageNum });
+                         else span.textContent = getText('pageLabel', { pageNum });
+                     }
+                  });
+                  const placeholderText = getText('stringInputPlaceholder', { totalPages: totalPages });
+                  pagesToDeleteStringInput.placeholder = placeholderText;
+             } else {
+                  const placeholderText = getText('stringInputPlaceholder', { totalPages: 'N' });
+                  pagesToDeleteStringInput.placeholder = placeholderText;
+             }
+
+            // Re-display current status message
+             if (!statusDiv.classList.contains('hidden')) {
+                 const currentStatusKey = statusDiv.dataset.translateKey;
+                 const currentStatusReplacements = JSON.parse(statusDiv.dataset.translateReplacements || '{}');
+                 const currentStatusType = statusDiv.dataset.statusType || 'info';
+                 const currentStatusIcon = statusDiv.dataset.statusIcon || null;
+                 if (currentStatusKey) {
+                     showStatus(currentStatusKey, currentStatusReplacements, currentStatusType, currentStatusIcon, false);
+                 }
+             }
+        }
+
+        // --- Event Listeners ---
+        pdfFile.addEventListener('change', handleFileSelect);
+        applyStringSelectionButton.addEventListener('click', handleApplyStringSelection);
+        selectAllButton.addEventListener('click', handleSelectAll);
+        deselectAllButton.addEventListener('click', handleDeselectAll);
+        pagePreviewContainer.addEventListener('click', handlePageItemClick);
+        deleteButton.addEventListener('click', handleDeleteSelectedPages);
+        langSelect.addEventListener('change', (e) => {
+            const newLang = e.target.value;
+            localStorage.setItem('preferredLang', newLang);
+            updateLanguage(newLang);
+        });
+
+        // --- Core Functions ---
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file || file.type !== 'application/pdf') {
+                showStatus('statusFileSelectError', {}, 'error', 'fa-exclamation-triangle');
+                resetUI(false); return;
+            }
+            originalFileName = file.name.replace(/\.pdf$/i, '');
+            resetUI(true); statusDiv.classList.add('hidden');
+            controlsDiv.classList.add('hidden'); // Hide controls initially
+            showStatus('statusLoading', {}, 'info', 'fa-spinner fa-spin'); // Show loading status
+
+            try {
+                const fileReader = new FileReader();
+                fileReader.onload = async (loadEvent) => {
+                    originalPdfBytes = new Uint8Array(loadEvent.target.result);
+                    try {
+                        const loadingTask = pdfjsLib.getDocument({ data: originalPdfBytes });
+                        currentPdfDocumentProxy = await loadingTask.promise; totalPages = currentPdfDocumentProxy.numPages;
+                        updateLanguage(currentLang); // Update placeholder
+                        showStatus('statusRendering', { totalPages }, 'info', 'fa-spinner fa-spin'); // Update status
+                        pagePreviewContainer.innerHTML = '';
+                        const renderPromises = [];
+                        for (let i = 1; i <= totalPages; i++) renderPromises.push(renderPage(i, currentPdfDocumentProxy));
+
+                        // Use Promise.allSettled and finally block
+                        try {
+                            await Promise.allSettled(renderPromises);
+                            console.log("All page rendering promises settled.");
+                        } catch (settleError) {
+                             console.error("Error during Promise.allSettled:", settleError);
+                        } finally {
+                            console.log("Rendering finished/settled. Updating status and showing controls.");
+                            // Update status *before* showing controls
+                            showStatus('statusRenderComplete', {}, 'success', 'fa-check-circle');
+                            controlsDiv.classList.remove('hidden'); // Show controls now
+                            updateSelectionSummary();
+                        }
+
+                    } catch (err) { // Catch errors from pdfjsLib.getDocument
+                        handlePdfError(err);
+                        resetUI(true);
+                    }
+                };
+                fileReader.onerror = () => {
+                    showStatus('statusFileReadError', {}, 'error', 'fa-times-circle');
+                    resetUI(true);
+                }
+                fileReader.readAsArrayBuffer(file);
+            } catch (err) {
+                showStatus('statusGenericError', { message: err.message }, 'error', 'fa-exclamation-triangle');
+                resetUI(true);
+            }
+        }
+
+        async function renderPage(pageNum, pdfDoc) { // Added dataset.isError
+            const pageIndex = pageNum - 1;
+            const pageDiv = document.createElement('div'); pageDiv.classList.add('page-item'); pageDiv.dataset.pageIndex = pageIndex;
+            const canvas = document.createElement('canvas'); const pageNumSpan = document.createElement('span');
+            pageNumSpan.classList.add('page-number'); pageNumSpan.textContent = getText('pageLabel', { pageNum });
+            pageNumSpan.dataset.isError = 'false';
+            pageDiv.appendChild(canvas); pageDiv.appendChild(pageNumSpan); pagePreviewContainer.appendChild(pageDiv);
+            if (selectedIndices.has(pageIndex)) pageDiv.classList.add('selected');
+            try {
+                const page = await pdfDoc.getPage(pageNum);
+                const scale = totalPages > 500 ? 0.15 : (totalPages > 100 ? 0.2 : 0.25);
+                const viewport = page.getViewport({ scale: scale });
+                const context = canvas.getContext('2d'); canvas.height = viewport.height; canvas.width = viewport.width;
+                const renderContext = { canvasContext: context, viewport: viewport }; await page.render(renderContext).promise;
+            } catch (renderErr) {
+                console.error(`Rendering page ${pageNum} failed:`, renderErr);
+                pageNumSpan.textContent = getText('pageRenderError', { pageNum }); pageNumSpan.dataset.isError = 'true';
+                pageDiv.style.borderColor = 'orange'; pageDiv.style.cursor = 'default';
+            }
+        }
+
+        // --- Other Core Functions (handleApplyStringSelection, handleSelectAll, handleDeselectAll, handlePageItemClick, handleDeleteSelectedPages) ---
+        // Logic remains the same, they rely on updated helper functions
+        function handleApplyStringSelection() {
+            if (!currentPdfDocumentProxy) return; const inputStr = pagesToDeleteStringInput.value.trim();
+            const parsedIndices = parsePageNumbers(inputStr, totalPages); if (parsedIndices === null) return;
+            selectedIndices.clear(); parsedIndices.forEach(index => selectedIndices.add(index));
+            updateVisualSelection(); updateSelectionSummary(); showStatus('statusAppliedStringSelection', { count: selectedIndices.size }, 'info', 'fa-info-circle'); lastClickedIndex = -1;
+        }
+        function handleSelectAll() {
+             if (!currentPdfDocumentProxy || totalPages === 0) return; selectedIndices.clear(); for (let i = 0; i < totalPages; i++) selectedIndices.add(i);
+             updateVisualSelection(); updateSelectionSummary(); lastClickedIndex = -1; showStatus('statusSelectedAll', { totalPages }, 'info', 'fa-check-double');
+        }
+        function handleDeselectAll() {
+             if (!currentPdfDocumentProxy || totalPages === 0) return; selectedIndices.clear(); updateVisualSelection(); updateSelectionSummary(); lastClickedIndex = -1;
+             showStatus('statusDeselectedAll', {}, 'info', 'fa-square');
+        }
+         function handlePageItemClick(event) {
+             const clickedItem = event.target.closest('.page-item'); if (!clickedItem || clickedItem.style.cursor === 'default') return;
+             const clickedIndex = parseInt(clickedItem.dataset.pageIndex, 10); if (isNaN(clickedIndex)) return;
+             if (event.shiftKey && lastClickedIndex !== -1) {
+                 const start = Math.min(lastClickedIndex, clickedIndex); const end = Math.max(lastClickedIndex, clickedIndex);
+                 const firstItemInSequence = document.querySelector(`.page-item[data-page-index="${lastClickedIndex}"]`); const shouldSelect = !firstItemInSequence?.classList.contains('selected');
+                 for (let i = start; i <= end; i++) { const item = document.querySelector(`.page-item[data-page-index="${i}"]`); if (item && item.style.cursor !== 'default') { if (shouldSelect) selectedIndices.add(i); else selectedIndices.delete(i); } }
+             } else { if (selectedIndices.has(clickedIndex)) selectedIndices.delete(clickedIndex); else selectedIndices.add(clickedIndex); lastClickedIndex = clickedIndex; }
+             updateVisualSelection(); updateSelectionSummary();
+         }
+        async function handleDeleteSelectedPages() {
+            if (!originalPdfBytes || selectedIndices.size === 0) { showStatus('statusNoPageSelected', {}, 'error', 'fa-exclamation-triangle'); return; }
+            if (selectedIndices.size >= totalPages) { showStatus('statusCannotDeleteAll', {}, 'error', 'fa-exclamation-triangle'); return; }
+            showStatus('statusDeleting', {}, 'info', 'fa-spinner fa-spin');
+            deleteButton.disabled = true; applyStringSelectionButton.disabled = true; selectAllButton.disabled = true; deselectAllButton.disabled = true; pagePreviewContainer.style.pointerEvents = 'none'; downloadLinkContainer.classList.add('hidden');
+            try {
+                await new Promise(resolve => setTimeout(resolve, 50)); const pdfDocToModify = await PDFDocument.load(originalPdfBytes); const indicesToDelete = Array.from(selectedIndices).sort((a, b) => b - a);
+                indicesToDelete.forEach(index => { if (index >= 0 && index < pdfDocToModify.getPageCount()) pdfDocToModify.removePage(index); else console.warn(`Attempting delete invalid index: ${index}`); });
+                const modifiedPdfBytes = await pdfDocToModify.save(); const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' }); const url = URL.createObjectURL(blob);
+                downloadLink.href = url; downloadLink.download = `${originalFileName}_deleted_${indicesToDelete.length}p.pdf`; downloadLinkContainer.classList.remove('hidden');
+                showStatus('statusDeleteSuccess', { count: indicesToDelete.length }, 'success', 'fa-check-circle');
+                deleteButton.disabled = false; applyStringSelectionButton.disabled = false; selectAllButton.disabled = false; deselectAllButton.disabled = false; pagePreviewContainer.style.pointerEvents = 'auto'; updateSelectionSummary();
+            } catch (err) {
+                console.error("Error deleting pages:", err); showStatus('statusDeleteError', { message: err.message }, 'error', 'fa-exclamation-triangle');
+                deleteButton.disabled = selectedIndices.size === 0; applyStringSelectionButton.disabled = false; selectAllButton.disabled = false; deselectAllButton.disabled = false; pagePreviewContainer.style.pointerEvents = 'auto';
+            }
+        }
+
+        // --- Helper Functions ---
+        function updateVisualSelection() { /* Logic unchanged */
+             const pageItems = pagePreviewContainer.querySelectorAll('.page-item');
+             pageItems.forEach(item => { const index = parseInt(item.dataset.pageIndex, 10); if (!isNaN(index)) { if (item.style.cursor !== 'default') { if (selectedIndices.has(index)) item.classList.add('selected'); else item.classList.remove('selected'); } else item.classList.remove('selected'); } });
+        }
+        function updateSelectionSummary() { /* Uses getText */
+            const count = selectedIndices.size; let key = (count === 0) ? 'selectionSummaryDefault' : 'selectionSummarySelected';
+            selectionSummary.textContent = getText(key, { count });
+            if (count === 0) selectionSummary.classList.remove('has-selection'); else selectionSummary.classList.add('has-selection');
+            deleteButton.disabled = count === 0 || count >= totalPages;
+        }
+        function parsePageNumbers(inputStr, maxPage) { /* Uses translated errors via showStatus */
+            const indices = new Set(); if (!inputStr) return []; const parts = inputStr.split(',');
+            for (const part of parts) { const trimmedPart = part.trim(); if (!trimmedPart) continue; if (trimmedPart.includes('-')) { const range = trimmedPart.split('-'); if (range.length !== 2) { showStatus('parseErrorRangeFormat', { part: trimmedPart }, 'error', 'fa-exclamation-triangle'); return null; } const start = parseInt(range[0].trim(), 10); const end = parseInt(range[1].trim(), 10); if (isNaN(start) || isNaN(end) || start <= 0 || end <= 0 || start > maxPage || end > maxPage || start > end) { showStatus('parseErrorRangeInvalid', { part: trimmedPart, maxPage }, 'error', 'fa-exclamation-triangle'); return null; } for (let i = start; i <= end; i++) indices.add(i - 1); } else { const pageNum = parseInt(trimmedPart, 10); if (isNaN(pageNum) || pageNum <= 0 || pageNum > maxPage) { showStatus('parseErrorNumberInvalid', { part: trimmedPart, maxPage }, 'error', 'fa-exclamation-triangle'); return null; } indices.add(pageNum - 1); } } return Array.from(indices);
+        }
+        function handlePdfError(err) { /* Uses translated errors via showStatus */
+             // loadingIndicator.classList.add('hidden'); // Ensure loading element is hidden if it existed
+             console.error("PDF Processing Error:", err);
+            let messageKey = 'statusProcessingError'; let replacements = { message: err.message }; let icon = 'fa-exclamation-triangle';
+            if (err.name === 'PasswordException') { messageKey = 'statusPasswordError'; replacements = {}; icon = 'fa-lock'; }
+            else if (err.name === 'InvalidPDFException') { messageKey = 'statusInvalidPDFError'; replacements = {}; icon = 'fa-file-excel';}
+            showStatus(messageKey, replacements, 'error', icon);
+        }
+        function showStatus(key, replacements = {}, type = 'info', iconClass = null, autoHide = true) { /* Uses getText, stores key */
+            const message = getText(key, replacements); statusDiv.innerHTML = ''; statusDiv.className = type;
+            statusDiv.dataset.translateKey = key; statusDiv.dataset.translateReplacements = JSON.stringify(replacements);
+            statusDiv.dataset.statusType = type; statusDiv.dataset.statusIcon = iconClass || '';
+            if (iconClass) { const icon = document.createElement('i'); icon.className = `fas ${iconClass}`; statusDiv.appendChild(icon); }
+            const textNode = document.createTextNode(` ${message}`); statusDiv.appendChild(textNode); statusDiv.classList.remove('hidden');
+            if (autoHide && type !== 'error' && !iconClass?.includes('fa-spinner')) { // Don't auto-hide loading spinners
+                 setTimeout(() => { if (statusDiv.dataset.translateKey === key) { statusDiv.classList.add('hidden'); delete statusDiv.dataset.translateKey; delete statusDiv.dataset.translateReplacements; delete statusDiv.dataset.statusType; delete statusDiv.dataset.statusIcon; } }, 5000);
+             }
+        }
+        function resetUI(fullReset = true) { /* Uses getText for placeholder */
+            if (fullReset) { pdfFile.value = ''; originalFileName = ''; }
+            pagePreviewContainer.innerHTML = ''; statusDiv.classList.add('hidden');
+            delete statusDiv.dataset.translateKey; delete statusDiv.dataset.translateReplacements; delete statusDiv.dataset.statusType; delete statusDiv.dataset.statusIcon;
+            // loadingIndicator.classList.add('hidden'); // Element removed
+            controlsDiv.classList.add('hidden'); downloadLinkContainer.classList.add('hidden'); pagesToDeleteStringInput.value = '';
+            const placeholderText = getText('stringInputPlaceholder', { totalPages: 'N' }); pagesToDeleteStringInput.placeholder = placeholderText;
+            selectedIndices.clear(); lastClickedIndex = -1; totalPages = 0; originalPdfBytes = null; currentPdfDocumentProxy = null;
+            deleteButton.disabled = true; applyStringSelectionButton.disabled = false; selectAllButton.disabled = false; deselectAllButton.disabled = false; pagePreviewContainer.style.pointerEvents = 'auto';
+            if (downloadLink.href && downloadLink.href.startsWith('blob:')) URL.revokeObjectURL(downloadLink.href);
+            downloadLink.href = '#'; updateSelectionSummary();
+        }
+
+        // --- Initial Load ---
+        function initialize() {
+            const savedLang = localStorage.getItem('preferredLang'); const browserLang = navigator.language || navigator.userLanguage; let initialLang = 'en';
+            if (savedLang && translations[savedLang]) initialLang = savedLang;
+            else if (browserLang) { if (translations[browserLang]) initialLang = browserLang; else { const baseLang = browserLang.split('-')[0]; if (translations[baseLang]) initialLang = baseLang; } }
+            if (!translations[initialLang]) initialLang = 'en';
+            langSelect.value = initialLang; updateLanguage(initialLang); resetUI();
+        }
+        document.addEventListener('DOMContentLoaded', initialize);
+
+    </script>
+</body>
+</html>
